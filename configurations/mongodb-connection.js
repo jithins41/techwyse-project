@@ -14,3 +14,5 @@ const createConnection = function () {
 
 
 }
+
+module.exports = createConnection;
