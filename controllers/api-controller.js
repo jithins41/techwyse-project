@@ -9,17 +9,23 @@ module.exports.createBook = (req, res, next) => {
     library.save().then(() => {
         res.json({ status: true, message: 'Book created succesfully' });
     }).catch(error => {
-        consoleHelpers.log(error);
+        res.status(500).json(error);
     })
 }
 
 module.exports.loadAllBooks = (req, res, next) => {
     Library.find({}, { _id: 0, __v: 0 }).exec().then((books) => {
         res.json(books);
+    }).catch(error => {
+        res.status(500).json(error);
     })
 }
 module.exports.loadBooksByAuthor = (req, res, next) => {
-
+    Library.find({ author: req.params.name }).then((response) => {
+        res.json(response);
+    }).catch(error => {
+        res.status(500).json(error);
+    })
 }
 module.exports.loadBooksByName = (req, res, next) => {
     Library.find({ $text: { $search: req.params.name } }).then((response) => {
@@ -29,5 +35,33 @@ module.exports.loadBooksByName = (req, res, next) => {
         else {
             res.json({ available: false });
         }
+    }).catch(error => {
+        res.status(500).json(error);
+    })
+}
+
+
+module.exports.processDeleteBook = (req, res, next) => {
+    Library.findByIdAndDelete(req.params.id).then((response) => {
+        res.json({ status: true, message: "Book deleted succesfully", book: response });
+    }).catch(error => {
+        res.status(500).json({ error });
+    })
+}
+
+module.exports.processDeleteBooksByAuthor = (req, res, next) => {
+    Library.deleteMany({ author: req.params.name }).then((response) => {
+        res.json({ status: true, message: `All boks with author ${req.params.name} deleted`, bdetails: response });
+    }).catch(error => {
+        res.status(500).json(error);
+    })
+}
+
+module.exports.processUpdateBookDetails = (req, res, next) => {
+    Library.findByIdAndUpdate(req.params.id, { ...req.body }).then((response) => {
+        res.json({ status: true, message: "Book details updated succesfully", details: response });
+    }).catch(error => {
+        console.log(error)
+        // res.status(500).json(error);
     })
 }
